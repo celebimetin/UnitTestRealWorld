@@ -26,7 +26,7 @@ namespace UnitTestRealWorld.Test
         }
 
         [Fact]
-        //Geriye bir view dönmesi ile ilgili test
+        //Geriye bir view dönmesi ile ilgili test edildi
         public async void Index_ActionExecutes_ReturnView()
         {
             var result = await _controller.Index();
@@ -34,14 +34,49 @@ namespace UnitTestRealWorld.Test
         }
 
         [Fact]
-        //Geriye bir Products List dönmesi ile ilgili test
+        //Geriye bir Products List dönmesi ile ilgili test edildi
         public async void Index_ActionExecutes_ReturnProductList()
         {
-            _mockRepo.Setup(repo => repo.GetAll()).ReturnsAsync(_products);
+            _mockRepo.Setup(x => x.GetAll()).ReturnsAsync(_products);
             var result = await _controller.Index();
             var viewResult = Assert.IsType<ViewResult>(result);
             var productList = Assert.IsAssignableFrom<IEnumerable<Product>>(viewResult.Model);
-            Assert.Equal<int>(3, productList.Count());
+            Assert.Equal(3, productList.Count());
+        }
+
+        [Fact]
+        //Gelen id null olma durumu test edildi
+        public async void Details_IdIsNull_ReturnRedirectToIndexAction()
+        {
+            var result = await _controller.Details(null);
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+        }
+
+        [Fact]
+        //Gelen id'nin olmaması durumu test edildi
+        public async void Details_IdInValid_ReturnNotFound()
+        {
+            Product product = null;
+            _mockRepo.Setup(x => x.GetById(0)).ReturnsAsync(product);
+            var result = await _controller.Details(0);
+            var redirect = Assert.IsType<NotFoundResult>(result);
+            Assert.Equal(404, redirect.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        public async void Details_IdValid_ReturnProduct(int productId)
+        {
+            Product product = _products.First(x => x.Id == productId);
+            _mockRepo.Setup(x => x.GetById(productId)).ReturnsAsync(product);
+            var result = await _controller.Details(productId);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var resultProduct = Assert.IsAssignableFrom<Product>(viewResult.Model);
+            Assert.Equal(product.Id, resultProduct.Id);
+            Assert.Equal(product.Name, resultProduct.Name);
+            Assert.Equal(product.Price, resultProduct.Price);
+            Assert.Equal(product.Stock, resultProduct.Stock);
         }
     }
 }

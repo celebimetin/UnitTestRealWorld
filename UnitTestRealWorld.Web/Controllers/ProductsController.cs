@@ -24,7 +24,7 @@ namespace UnitTestRealWorld.Web.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             var product = await _repository.GetById((int)id);
             if (product == null)
                 return NotFound();
