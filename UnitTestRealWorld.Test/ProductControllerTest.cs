@@ -26,7 +26,6 @@ namespace UnitTestRealWorld.Test
         }
 
         [Fact]
-        //Geriye bir view dönmesi ile ilgili test edildi
         public async void Index_ActionExecutes_ReturnView()
         {
             var result = await _controller.Index();
@@ -34,7 +33,6 @@ namespace UnitTestRealWorld.Test
         }
 
         [Fact]
-        //Geriye bir Products List dönmesi ile ilgili test edildi
         public async void Index_ActionExecutes_ReturnProductList()
         {
             _mockRepo.Setup(x => x.GetAll()).ReturnsAsync(_products);
@@ -45,7 +43,6 @@ namespace UnitTestRealWorld.Test
         }
 
         [Fact]
-        //Gelen id null olma durumu test edildi
         public async void Details_IdIsNull_ReturnRedirectToIndexAction()
         {
             var result = await _controller.Details(null);
@@ -54,7 +51,6 @@ namespace UnitTestRealWorld.Test
         }
 
         [Fact]
-        //Gelen id'nin olmaması durumu test edildi
         public async void Details_IdInValid_ReturnNotFound()
         {
             Product product = null;
