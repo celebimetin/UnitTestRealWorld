@@ -74,5 +74,47 @@ namespace UnitTestRealWorld.Test
             Assert.Equal(product.Price, resultProduct.Price);
             Assert.Equal(product.Stock, resultProduct.Stock);
         }
+
+        [Fact]
+        public void Create_ActionExecutes_ReturnView()
+        {
+            var result = _controller.Create();
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
+        public async void CreatePOST_InValid_ModelState_ReturnView()
+        {
+            _controller.ModelState.AddModelError("Name", "Name Alanı gereklidir");
+            var result = await _controller.Create(_products.First());
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsType<Product>(viewResult.Model);
+        }
+
+        [Fact]
+        public async void CreatePOST_Valid_ModelState_ReturnRedirectToIndexAction()
+        {
+            var result = await _controller.Create(_products.First());
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+        }
+
+        [Fact]
+        public async void CreatePOST_Valid_ModelState_CreateMethodExecute()
+        {
+            Product product = null;
+            _mockRepo.Setup(x => x.Create(It.IsAny<Product>())).Callback<Product>(x => product = x);
+            var result = await _controller.Create(_products.First());
+            _mockRepo.Verify(x => x.Create(It.IsAny<Product>()), Times.Once);
+            Assert.Equal(_products.First().Id, product.Id);
+        }
+
+        [Fact]
+        public async void CreatePOST_InValid_ModelState_NeverCreateExecute()
+        {
+            _controller.ModelState.AddModelError("Name", " ");
+            var result = await _controller.Create(_products.First());
+            _mockRepo.Verify(x => x.Create(It.IsAny<Product>()), Times.Never);
+        }
     }
 }
