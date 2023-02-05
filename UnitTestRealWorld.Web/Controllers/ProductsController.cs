@@ -71,21 +71,7 @@ namespace UnitTestRealWorld.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _repository.Update(product);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _repository.Update(product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -109,17 +95,17 @@ namespace UnitTestRealWorld.Web.Controllers
         {
             var product = await _repository.GetById(id);
             if (product != null)
-            {
                 _repository.Delete(product);
-            }
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        public bool ProductExists(int id)
         {
-            var product = _repository.GetById(id).Result;
-            if(product == null) { return false; }
-            return true;
+            var product = _repository.GetById(id);
+            if (product == null)
+                return false;
+            else
+                return true;
         }
     }
 }
